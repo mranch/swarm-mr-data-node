@@ -7,3 +7,13 @@ File where data node receives requests from management node about:
 5) request to return a status(if works) and file size
 '''
 # TODO: define methods which implement each request separately
+import os
+
+
+def make_file(path):
+    dir_name = path.split('\\')[-1]
+    if not os.path.isdir('data\\'+dir_name):
+        os.makedirs('data\\'+dir_name)
+
+def write(content):
+    pass
