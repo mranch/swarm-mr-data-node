@@ -25,14 +25,13 @@ class Handler(server.BaseHTTPRequestHandler):
 
     def recognize_command(self,content):
         json_data_obj = dict()
+        print(content)
         if 'make_file' in content:
             json_data_obj = content['make_file']
             print(rc.make_file(json_data_obj["file_name"]))
         elif 'write' in content:
-            pass
-
-
-
+            json_data_obj = content['write']
+            print(rc.write(json_data_obj))
         return json_data_obj
 
 def start_server(server_address):

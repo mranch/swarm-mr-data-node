@@ -17,7 +17,12 @@ def make_file(path):
 
 
 def write(content):
-    pass
+    file_name = content['file_name'].split('\\')[-1]
+    if not os.path.isfile('data\\' + file_name):
+        f = open('data\\' + file_name, 'a')
+        f.writelines(content['segment'])
+        f.close()
+
 
 
 def map(field_delimiter, key, source, dest):
@@ -38,5 +43,5 @@ def map(field_delimiter, key, source, dest):
     return res
 
 
-map('|', '0', "C:\\Users\\smart\\workspace\\client_data\\text.txt",
-    "C:\\Users\\smart\\workspace\\client_data\\test_out.txt")
+map('|', '0', "C:\\Users\\Anchi\\workspace\\client_data\\text.txt",
+    "C:\\Users\\Anchi\\workspace\\client_data\\test_out.txt")
