@@ -17,12 +17,22 @@ def make_file(path):
 
 
 def write(content):
+    print('SOSI')
+    print(os.getcwd())
+    print(content)
+    dir_name = content['file_name'].split('\\')[-2]
     file_name = content['file_name'].split('\\')[-1]
-    if not os.path.isfile('data\\' + file_name):
-        f = open('data\\' + file_name, 'a')
-        f.writelines(content['segment'])
-        f.close()
+    print(dir_name)
+    print(file_name)
+    path = os.path.dirname(__file__) +'\\..\\data\\' +dir_name+'\\' + file_name
+    print(path)
 
+    #if os.path.isdir('\\data\\' + dir_name):
+    f = open(path, 'w+')
+    print(f.closed)
+    f.writelines(content['segment'])
+    f.close()
+    print(f.closed)
 
 
 def map(field_delimiter, key, source, dest):
@@ -40,8 +50,15 @@ def map(field_delimiter, key, source, dest):
             res_line += item
         res.append(res_line)
     open(dest, 'w+').writelines(res)
+
     return res
 
 
-map('|', '0', "C:\\Users\\Anchi\\workspace\\client_data\\text.txt",
-    "C:\\Users\\Anchi\\workspace\\client_data\\test_out.txt")
+# map('|', '0', "C:\\Users\\smart\\workspace\\client_data\\text.txt",
+#     "C:\\Users\\smart\\workspace\\client_data\\test_out.txt")
+
+#write({"file_name": 'C:/Users/smart/workspace/KURSOVA/swarm-mr-client\\..\\..\\client_data\\out.txt\\f2', "segment": ['A|1', 'B|2']})
+
+# f = open(os.path.join(os.pardir + '\\data\\', "filename"), "w")
+# f.write('hhhhh')
+# f.close()

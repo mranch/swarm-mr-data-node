@@ -1,4 +1,7 @@
 '''
 Returns status and file size of data node to the management node
 '''
-# TODO: define a mthord which returns the info and is called in receive_commands.py
+# TODO: define a method which returns the info and is called in receive_commands.py
+
+def get_status(request):
+    pass

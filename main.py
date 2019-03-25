@@ -25,7 +25,7 @@ class Handler(server.BaseHTTPRequestHandler):
 
     def recognize_command(self,content):
         json_data_obj = dict()
-        print(content)
+        #print(content)
         if 'make_file' in content:
             json_data_obj = content['make_file']
             print(rc.make_file(json_data_obj["file_name"]))
