@@ -17,22 +17,14 @@ def make_file(path):
 
 
 def write(content):
-    print('SOSI')
-    print(os.getcwd())
-    print(content)
     dir_name = content['file_name'].split('\\')[-2]
     file_name = content['file_name'].split('\\')[-1]
-    print(dir_name)
-    print(file_name)
     path = os.path.dirname(__file__) +'\\..\\data\\' +dir_name+'\\' + file_name
-    print(path)
 
     #if os.path.isdir('\\data\\' + dir_name):
     f = open(path, 'w+')
-    print(f.closed)
     f.writelines(content['segment'])
     f.close()
-    print(f.closed)
 
 
 def map(field_delimiter, key, source, dest):
