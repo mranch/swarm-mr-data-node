@@ -32,6 +32,10 @@ class Handler(server.BaseHTTPRequestHandler):
         elif 'write' in content:
             json_data_obj = content['write']
             print(rc.write(json_data_obj))
+        elif 'map' in content:
+            json_data_obj = content['map']
+            print(rc.map(json_data_obj['field_delimeter'], json_data_obj['key'],
+                         json_data_obj['source'], json_data_obj['dest']))
         return json_data_obj
 
 def start_server(server_address):
