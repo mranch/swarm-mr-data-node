@@ -41,6 +41,9 @@ def map(field_delimiter, key, dest):
     dir_name = "data\\\\"+ aa
     for file in os.listdir(dir_name):
         content = open(dir_name+'\\\\'+ file).readlines()
+    dir_name = 'data\\'+ dest.split('\\')[-1]
+    for file in os.listdir(dir_name):
+        content = open(dir_name+'\\'+ file).readlines()
         key_list = key.split(',')
         res = list()
         for field in content:

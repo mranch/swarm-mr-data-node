@@ -37,7 +37,6 @@ class Handler(server.BaseHTTPRequestHandler):
             json_data_obj = content['map']
             rc.map(json_data_obj['mapper'], json_data_obj['field_delimiter'], json_data_obj['key_delimiter'],
                          json_data_obj['destination_file'])
-
             rc.min_max_hash(rc.hash_keys(json_data_obj['destination_file']),json_data_obj['destination_file'])
         elif 'shuffle' in content:
             print(content['shuffle'])
