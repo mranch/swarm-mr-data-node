@@ -2,6 +2,7 @@ from http import server
 import json
 from multiprocessing import Process
 from receive_commands import receive_commands as rc
+from http_communication import shuffle
 import os
 
 class Handler(server.BaseHTTPRequestHandler):
@@ -34,8 +35,13 @@ class Handler(server.BaseHTTPRequestHandler):
             print(rc.write(json_data_obj))
         elif 'map' in content:
             json_data_obj = content['map']
-            print(rc.map(json_data_obj['field_delimeter'], json_data_obj['key'],
-                         json_data_obj['source'], json_data_obj['dest']))
+            rc.map(json_data_obj['mapper'], json_data_obj['field_delimiter'], json_data_obj['key_delimiter'],
+                         json_data_obj['destination_file'])
+
+            rc.min_max_hash(rc.hash_keys(json_data_obj['destination_file']),json_data_obj['destination_file'])
+        elif 'shuffle' in content:
+            print(content['shuffle'])
+            shuffle.shuffle(content['shuffle'])
         return json_data_obj
 
 def start_server(server_address):
