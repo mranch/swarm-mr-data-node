@@ -11,22 +11,24 @@ import os
 import json
 import requests
 
+
 def hash_f(str):
     res = 545
     for i in str:
-        res+=ord(i)
+        res += ord(i)
     return res
 
+
 def make_file(path):
-    dir_name = path.split('\\')[-1]
-    if not os.path.isdir('data\\' + dir_name):
-        os.makedirs('data\\' + dir_name)
+    dir_name = path.split(os.sep)[-1]
+    if not os.path.isdir(os.path.join('data', dir_name)):
+        os.makedirs(os.path.join('data', dir_name))
 
 
 def write(content):
-    dir_name = content['file_name'].split('\\')[-2]
-    file_name = content['file_name'].split('\\')[-1]
-    path = os.path.dirname(__file__) + '\\..\\data\\' + dir_name + '\\' + file_name
+    dir_name = content['file_name'].split(os.sep)[-2]
+    file_name = content['file_name'].split(os.sep)[-1]
+    path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, file_name)
 
     # if os.path.isdir('\\data\\' + dir_name):
     f = open(path, 'w+')
@@ -34,16 +36,38 @@ def write(content):
     f.close()
 
 
+# def map(mapper, field_delimiter, key, dest):
+#     LOC = """
+# def map(field_delimiter, key, dest):
+#     aa = dest.split('\\\\')[-1]
+#     dir_name = "data\\\\"+ aa
+#     for file in os.listdir(dir_name):
+#         content = open(dir_name+'\\\\'+ file).readlines()
+#     dir_name = 'data\\'+ dest.split(os.sep)[-1]
+#     for file in os.listdir(dir_name):
+#         content = open(dir_name+'\\'+ file).readlines()
+#         key_list = key.split(',')
+#         res = list()
+#         for field in content:
+#             field=field[:-1]
+#             line = field.split(field_delimiter)
+#             res_line = str()
+#             for item in key_list:
+#                 res_line += line[int(item)]
+#                 res_line += field_delimiter
+#             res_line = res_line[:-1] + '^'
+#             for item in field:
+#                 res_line += item
+#             res.append(res_line+'\\n')
+#         open(dir_name+'\\\\'+ file, 'w+').writelines(res)
+# map(field_delimiter, key, dest)
+# """
+#     exec(LOC)
+
 def map(mapper, field_delimiter, key, dest):
-    LOC = """
-def map(field_delimiter, key, dest):
-    aa = dest.split('\\\\')[-1]
-    dir_name = "data\\\\"+ aa
+    dir_name = os.path.join('data',dest.split(os.sep)[-1])
     for file in os.listdir(dir_name):
-        content = open(dir_name+'\\\\'+ file).readlines()
-    dir_name = 'data\\'+ dest.split('\\')[-1]
-    for file in os.listdir(dir_name):
-        content = open(dir_name+'\\'+ file).readlines()
+        content = open(os.path.join(dir_name, file)).readlines()
         key_list = key.split(',')
         res = list()
         for field in content:
@@ -56,16 +80,13 @@ def map(field_delimiter, key, dest):
             res_line = res_line[:-1] + '^'
             for item in field:
                 res_line += item
-            res.append(res_line+'\\n')
-        open(dir_name+'\\\\'+ file, 'w+').writelines(res)
-map(field_delimiter, key, dest)
-"""
-    exec(LOC)
+            res.append(res_line+'\n')
+        open(os.path.join(dir_name, file), 'w+').writelines(res)
 
 
 def hash_keys(content):
-    dir_name = content.split('\\')[-1]
-    path = os.path.dirname(__file__) + '\\..\\data\\'+ dir_name
+    dir_name = content.split(os.sep)[-1]
+    path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name)
     print(path)
     files = []
     hash_key_list = list()
@@ -79,24 +100,25 @@ def hash_keys(content):
     print(hash_key_list)
     return hash_key_list
 
-def min_max_hash(hash_key_list,file_name):
-    arbiter_node_json_data = open('config\\data_node_info.json')
+
+def min_max_hash(hash_key_list, file_name):
+    arbiter_node_json_data = open(os.path.join('config', 'data_node_info.json'))
     arbiter_node_data = json.load(arbiter_node_json_data)['arbiter_address']
     print(arbiter_node_data)
-    res= list()
+    res = list()
     res.append(max(hash_key_list))
     res.append(min(hash_key_list))
     url = 'http://' + arbiter_node_data
-    diction ={
+    diction = {
         'hash':
             {
-                'list_keys':res,
-                'file_name':file_name
+                'list_keys': res,
+                'file_name': file_name
             }
     }
     response = requests.post(url, data=json.dumps(diction))
     return response.json()
-    #return res
+    # return res
 
 # Python program to illustrate use of exec to
 # execute a given code as string.
