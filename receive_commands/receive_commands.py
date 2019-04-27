@@ -115,3 +115,12 @@ def min_max_hash(hash_key_list, file_name):
     }
     response = requests.post(url, data=json.dumps(diction))
     return response.json()
+
+
+def finish_shuffle(content):
+    print("FINISH_SHUFFLE_START")
+    data = content['finish_shuffle']
+    dir_name = data['file_path']
+    f = open(os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, 'shuffled'), 'a+')
+    f.writelines(data['content'])
+    print("FINISH_SHUFFLE_END")

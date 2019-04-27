@@ -23,7 +23,6 @@ class Handler(server.BaseHTTPRequestHandler):
 
         self.wfile.write(bytes(json.dumps(self.recognize_command(json_data_obj)), 'utf-8'))
 
-
     def recognize_command(self, content):
         json_data_obj = dict()
         if 'make_file' in content:
@@ -41,6 +40,9 @@ class Handler(server.BaseHTTPRequestHandler):
             shuffle.shuffle(content['shuffle'])
         elif 'reduce' in content:
             rc.reduce('reducer', content['reduce'])
+        elif 'finish_shuffle' in content:
+            print("FINISH_SHUFFLE_RECOGNIZED")
+            rc.finish_shuffle(content)
         return json_data_obj
 
 
@@ -55,6 +57,6 @@ def start_local_server_on_port(port):
     p.start()
 
 
-if (__name__ == '__main__'):
+if __name__ == '__main__':
     start_local_server_on_port(8014)
 # start_local_server_on_port(8015)
