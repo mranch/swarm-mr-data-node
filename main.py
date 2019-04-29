@@ -39,10 +39,14 @@ class Handler(server.BaseHTTPRequestHandler):
         elif 'shuffle' in content:
             shuffle.shuffle(content['shuffle'])
         elif 'reduce' in content:
-            rc.reduce('reducer', content['reduce'])
+            rc.reduce(content['reduce'])
         elif 'finish_shuffle' in content:
             print("FINISH_SHUFFLE_RECOGNIZED")
             rc.finish_shuffle(content)
+        elif 'clear_data' in content:
+            print('CLEAR_DATA_DATA_NODE_START')
+            rc.clear_data(content)
+            print('CLEAR_DATA_DATA_NODE_FINISH')
         return json_data_obj
 
 

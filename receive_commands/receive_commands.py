@@ -10,7 +10,7 @@ File where data node receives requests from management node about:
 import os
 import json
 import requests
-
+import shutil
 
 def hash_f(str):
     res = 545
@@ -23,6 +23,7 @@ def make_file(path):
     dir_name = path.split(os.sep)[-1]
     if not os.path.isdir(os.path.join('data', dir_name)):
         os.makedirs(os.path.join('data', dir_name))
+    # open(os.path.join('data', dir_name), 'w').close()
 
 
 def write(content):
@@ -37,7 +38,7 @@ def write(content):
     f.close()
 
 
-def reduce(reducer, content):
+'''def reduce(reducer, content):
     import collections
     result_dict = collections.Counter()
     dir_name = os.path.join(os.path.dirname(__file__), '..', 'data', content.split(os.sep)[-1])
@@ -54,8 +55,49 @@ def reduce(reducer, content):
     for item in result_dict.keys():
         result.append(item + '^' + str(result_dict[item]))
 
-    return result
+    return result'''
 
+
+'''
+SHOULD KEY_DELIMITER BE INDEX OR SYMBOL?
+'''
+def reduce(content):
+    import collections
+    reducer = content['reducer']
+    kd = content['key_delimiter']
+    dest = content['destination_file']
+    dir_name = os.path.join('data', dest.split(os.sep)[-1])
+    new_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
+                   + '_reduce' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
+    make_file(new_dir_name)
+    src_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
+                   + '_shuffle' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
+    print('???????????????????????????')
+    print(os.path.join(src_dir_name, 'shuffled'))
+    print('??????????????????????????????')
+    content = open(os.path.join(os.path.dirname(__file__), '..', 'data', src_dir_name, 'shuffled')).readlines()
+    print("REDUCE_METHOD")
+    result_dict = collections.Counter()
+    for field in content:
+        key = field[0]
+        if key in result_dict.keys():
+            pass
+        else:
+            sum = 0
+            for i in content:
+                arr = i.split('|')
+                if arr[0] == key:
+                    sum += int(arr[-1])
+            result_dict[key] = sum
+    result = list()
+
+    for item in result_dict.keys():
+        result.append(item + '|' + str(result_dict[item]) + '\n')
+    f = open(os.path.join(os.path.dirname(__file__), '..', 'data', new_dir_name, 'result'),'w+')
+    f.writelines(result)
+    f.close()
+    print("END_REDUCE_METHOD")
+    return result
 
 def map(mapper, field_delimiter, key, dest):
     dir_name = os.path.join('data', dest.split(os.sep)[-1])
@@ -79,6 +121,7 @@ def map(mapper, field_delimiter, key, dest):
             res.append(res_line + '\n')
         f = open(os.path.join(os.path.dirname(__file__), '..', 'data', new_dir_name, file), 'w+')
         f.writelines(res)
+        f.close()
 
 
 def hash_keys(content):
@@ -121,6 +164,23 @@ def finish_shuffle(content):
     print("FINISH_SHUFFLE_START")
     data = content['finish_shuffle']
     dir_name = data['file_path']
+    full_dir_name = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name)
+    if not os.path.isfile(full_dir_name):
+        make_file(full_dir_name)
     f = open(os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, 'shuffled'), 'a+')
     f.writelines(data['content'])
+    f.close()
     print("FINISH_SHUFFLE_END")
+
+
+def clear_data(content):
+    data = content['clear_data']
+    folder_name = data['folder_name']
+    full_folder_name = os.path.join(os.path.dirname(__file__), '..', folder_name)
+    shutil.rmtree(full_folder_name)
+    os.mkdir(full_folder_name)
+    '''for f in os.listdir(full_folder_name):
+        file = os.path.join('..', full_folder_name, f)
+        ff = open(file)
+        ff.close()
+        os.remove(file)'''

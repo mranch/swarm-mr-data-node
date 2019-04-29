@@ -43,7 +43,9 @@ def shuffle(content):
     }
     new_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
                    + '_shuffle' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
-    make_file(new_dir_name)
+
+    if not os.path.isfile(new_dir_name):
+        make_file(new_dir_name)
 
     for i in content['nodes_keys']:
         #if i['data_node_ip'] != self_node_ip:
