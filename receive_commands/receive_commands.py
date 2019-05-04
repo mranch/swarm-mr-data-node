@@ -99,6 +99,7 @@ def reduce(content):
     print("END_REDUCE_METHOD")
     return result
 
+
 def map(mapper, field_delimiter, key, dest):
     dir_name = os.path.join('data', dest.split(os.sep)[-1])
     new_dir_name = dir_name.split('\\')[-1].split('.')[0] \
@@ -122,6 +123,7 @@ def map(mapper, field_delimiter, key, dest):
         f = open(os.path.join(os.path.dirname(__file__), '..', 'data', new_dir_name, file), 'w+')
         f.writelines(res)
         f.close()
+    return new_dir_name
 
 
 def hash_keys(content):
@@ -148,12 +150,19 @@ def min_max_hash(hash_key_list, file_name):
     res = list()
     res.append(max(hash_key_list))
     res.append(min(hash_key_list))
+    dir_name = file_name.split(os.sep)[-1]
+    print("DIR_NAME_IN_MIN_MAX_HASH")
+    print(dir_name)
+    new_dir_name = dir_name.split('_')[0] + '_shuffle' + '.' + dir_name.split('.')[-1]
+    #new_dir_name = dir_name
+    print("NEW_DIR_NAME_IN_MIN_MAX_HASH")
+    print(new_dir_name)
     url = 'http://' + arbiter_node_data
     diction = {
         'hash':
             {
                 'list_keys': res,
-                'file_name': file_name
+                'file_name': new_dir_name
             }
     }
     response = requests.post(url, data=json.dumps(diction))

@@ -33,9 +33,12 @@ class Handler(server.BaseHTTPRequestHandler):
             print(rc.write(json_data_obj))
         elif 'map' in content:
             json_data_obj = content['map']
-            rc.map(json_data_obj['mapper'], json_data_obj['field_delimiter'], json_data_obj['key_delimiter'],
+            res = rc.map(json_data_obj['mapper'], json_data_obj['field_delimiter'], json_data_obj['key_delimiter'],
                    json_data_obj['destination_file'])
-            rc.min_max_hash(rc.hash_keys(json_data_obj['destination_file']), json_data_obj['destination_file'])
+            print("RES")
+            print(res)
+            print("RES_END")
+            rc.min_max_hash(rc.hash_keys(res), res)
         elif 'shuffle' in content:
             shuffle.shuffle(content['shuffle'])
         elif 'reduce' in content:

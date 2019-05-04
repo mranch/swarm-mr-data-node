@@ -41,8 +41,9 @@ def shuffle(content):
         'shuffle_items': [
         ]
     }
-    new_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
-                   + '_shuffle' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
+    new_dir_name = dir_name
+    #new_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
+     #             + '_shuffle' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
 
     if not os.path.isfile(new_dir_name):
         make_file(new_dir_name)
