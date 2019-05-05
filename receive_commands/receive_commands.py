@@ -11,6 +11,7 @@ import os
 import json
 import requests
 import shutil
+import base64
 
 
 def hash_f(str):
@@ -56,10 +57,11 @@ def write(content):
 
 
 def reduce(content):
-	import collections
-	reducer = content['reducer']
+	rds = base64.b64decode(content['reducer'])
 	kd = content['key_delimiter']
 	dest = content['destination_file']
+
+
 	dir_name = os.path.join('data', dest.split(os.sep)[-1])
 	new_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
 				   + '_reduce' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
@@ -68,23 +70,8 @@ def reduce(content):
 				   + '_shuffle' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
 
 	shuffle_content = open(os.path.join(os.path.dirname(__file__), '..', 'data', src_dir_name, 'shuffled')).readlines()
-	result_dict = collections.Counter()
-	for field in shuffle_content:
-		key = field.split('^')[0]
-		if key in result_dict.keys():
-			pass
-		else:
-			sum = 0
-			for i in shuffle_content:
-				arr = i.split('|')
-				if arr[0].split('^')[0] == key:
-					sum += int(arr[-1])
-
-			result_dict[key] = sum
-	result = list()
-
-	for item in result_dict.keys():
-		result.append(item + '|' + str(result_dict[item]) + os.linesep)
+	exec(rds)
+	result = locals()['custom_reducer'](shuffle_content)
 	f = open(os.path.join(os.path.dirname(__file__), '..', 'data', new_dir_name, 'result'), 'w+')
 	f.writelines(result)
 	f.close()
@@ -96,21 +83,11 @@ def map(mapper, field_delimiter, key, dest):
 	new_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
 				   + '_map' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
 	make_file(new_dir_name)
+	decoded_mapper = base64.b64decode(mapper)
 	for file in os.listdir(dir_name):
 		content = open(os.path.join(dir_name, file)).readlines()
-		key_list = key.split(',')
-		res = list()
-		for field in content:
-			field = field[:-1]
-			line = field.split(field_delimiter)
-			res_line = str()
-			for item in key_list:
-				res_line += line[int(item)]
-				res_line += field_delimiter
-			res_line = res_line[:-1] + '^'
-			for item in field:
-				res_line += item
-			res.append(res_line + os.linesep)
+		exec(decoded_mapper)
+		res = locals()['custom_mapper'](content,field_delimiter,key)
 		f = open(os.path.join(os.path.dirname(__file__), '..', 'data', new_dir_name, file), 'w+')
 		f.writelines(res)
 		f.close()

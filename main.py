@@ -3,7 +3,7 @@ import json
 from multiprocessing import Process
 from receive_commands import receive_commands as rc
 from http_communication import shuffle
-import os
+import base64
 
 
 class Handler(server.BaseHTTPRequestHandler):
@@ -43,12 +43,9 @@ class Handler(server.BaseHTTPRequestHandler):
 		elif 'reduce' in content:
 			rc.reduce(content['reduce'])
 		elif 'finish_shuffle' in content:
-			# print("FINISH_SHUFFLE_RECOGNIZED")
 			rc.finish_shuffle(content)
 		elif 'clear_data' in content:
-			# print('CLEAR_DATA_DATA_NODE_START')
 			rc.clear_data(content)
-		# print('CLEAR_DATA_DATA_NODE_FINISH')
 		return json_data_obj
 
 
@@ -65,4 +62,3 @@ def start_local_server_on_port(port):
 
 if __name__ == '__main__':
 	start_local_server_on_port(8014)
-# start_local_server_on_port(8015)
