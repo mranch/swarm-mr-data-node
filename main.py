@@ -27,7 +27,8 @@ class Handler(server.BaseHTTPRequestHandler):
 		json_data_obj = dict()
 		if 'make_file' in content:
 			json_data_obj = content['make_file']
-			rc.make_file(json_data_obj["file_name"])
+			#rc.make_file(json_data_obj["file_name"])
+			rc.create_dest_file(json_data_obj["file_name"])
 		elif 'write' in content:
 			json_data_obj = content['write']
 			rc.write(json_data_obj)

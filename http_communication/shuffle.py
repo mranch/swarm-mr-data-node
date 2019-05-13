@@ -32,6 +32,9 @@ class ShuffleCommand:
 
 def shuffle(content):
 	dir_name = content['file_name'].split(os.sep)[-1]
+	print("DIR_NAME_SHUFFLE")
+	print(dir_name)
+	print("DIR_NAME_SHUFFLE_END")
 	path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name)
 	arbiter_node_json_data = open(os.path.join('config', 'data_node_info.json'))
 	self_node_ip = json.load(arbiter_node_json_data)['self_address']

@@ -21,14 +21,25 @@ def hash_f(str):
 	return res
 
 
+def create_dest_file(file_name):
+	if not os.path.isfile(os.path.join('data', file_name)):
+		with open(os.path.join('data', file_name), 'w+') as f:
+			f.close()
+	dir_name = file_name.split('.')[0] + '_init.' + file_name.split('.')[1]
+	if not os.path.isdir(os.path.join('data', dir_name)):
+		os.makedirs(os.path.join('data', dir_name))
+
 def make_file(path):
 	dir_name = path.split(os.sep)[-1]
 	if not os.path.isdir(os.path.join('data', dir_name)):
 		os.makedirs(os.path.join('data', dir_name))
 
 
+
 def write(content):
 	dir_name = content['file_name'].split(os.sep)[-2]
+	dir_name_arr = dir_name.split('.')
+	dir_name = dir_name_arr[0] + '_init.' + dir_name_arr[1]
 	file_name = content['file_name'].split(os.sep)[-1]
 	path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, file_name)
 	f = open(path, 'w+')
@@ -60,19 +71,19 @@ def reduce(content):
 	rds = base64.b64decode(content['reducer'])
 	kd = content['key_delimiter']
 	dest = content['destination_file']
-
+	print("DEST_REDUCE")
+	print(dest)
+	print("DEST_REDUCE_END")
 
 	dir_name = os.path.join('data', dest.split(os.sep)[-1])
-	new_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
-				   + '_reduce' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
-	make_file(new_dir_name)
+
 	src_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
 				   + '_shuffle' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
 
 	shuffle_content = open(os.path.join(os.path.dirname(__file__), '..', 'data', src_dir_name, 'shuffled')).readlines()
 	exec(rds)
 	result = locals()['custom_reducer'](shuffle_content)
-	f = open(os.path.join(os.path.dirname(__file__), '..', 'data', new_dir_name, 'result'), 'w+')
+	f = open(os.path.join(os.path.dirname(__file__), '..', 'data', dest), 'w+')
 	f.writelines(result)
 	f.close()
 	return result
@@ -80,9 +91,17 @@ def reduce(content):
 
 def map(mapper, field_delimiter, key, dest):
 	dir_name = os.path.join('data', dest.split(os.sep)[-1])
+	print("DIR_NAME")
+	print(dir_name)
+	print("DIR_NAME_END")
 	new_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
 				   + '_map' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
+	print("NEW_DIR_NAME")
+	print(new_dir_name)
+	print("NEW_DIR_NAME_END")
 	make_file(new_dir_name)
+	dir_name_arr = dir_name.split('.')
+	dir_name = dir_name_arr[0] + '_init.' + dir_name_arr[1]
 	decoded_mapper = base64.b64decode(mapper)
 	for file in os.listdir(dir_name):
 		content = open(os.path.join(dir_name, file)).readlines()
