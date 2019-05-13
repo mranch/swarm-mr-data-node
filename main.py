@@ -46,6 +46,15 @@ class Handler(server.BaseHTTPRequestHandler):
 			rc.finish_shuffle(content)
 		elif 'clear_data' in content:
 			rc.clear_data(content)
+		elif 'get_file' in content:
+			json_data_obj.clear()
+			json_data_obj['file']=rc.get_file(content['get_file'])
+		elif 'get_hash_of_key' in content:
+			json_data_obj.clear()
+			json_data_obj['key_hash']=rc.hash_f(content['get_hash_of_key'])
+		elif 'get_result_of_key' in content:
+			json_data_obj.clear()
+			json_data_obj['result']=rc.get_result_of_key(content['get_result_of_key'])
 		return json_data_obj
 
 

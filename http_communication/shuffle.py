@@ -69,7 +69,6 @@ def shuffle(content):
 						for i in result['shuffle_items']:
 							if i['data_node_ip'] == item['data_node_ip']:
 								i['content'].append(line)
-
 	for i in result['shuffle_items']:
 		if i['data_node_ip'] == self_node_ip:
 			f = open(os.path.join(os.path.dirname(__file__), '..', 'data', new_dir_name, 'shuffled'), 'a+')

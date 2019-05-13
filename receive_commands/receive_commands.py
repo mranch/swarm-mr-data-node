@@ -144,3 +144,22 @@ def clear_data(content):
 	full_folder_name = os.path.join(os.path.dirname(__file__), '..', folder_name)
 	shutil.rmtree(full_folder_name)
 	os.mkdir(full_folder_name)
+
+def get_file(content):
+	file_name = content['file_name'].split(os.sep)[-1]
+	dir_name = file_name.split('.')[0]+'_reduce.'+file_name.split('.')[1]
+	path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, 'result')
+	print(path)
+	data = open(path).read()
+	return data
+
+def get_result_of_key(content):
+	dir_name = content['get_result_of_key']['file_name'].split(os.sep)[-1]
+	key = content['get_result_of_key']['key']
+	field_delimiter = content['get_result_of_key']['field_delimiter']
+	dir_name = dir_name.split('.')[0]+'_reduce.'+dir_name.split('.')[1]
+	path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, 'result')
+	file = open(path)
+	for line in file.readlines():
+		if line.split(field_delimiter)[0]==key:
+			return line
