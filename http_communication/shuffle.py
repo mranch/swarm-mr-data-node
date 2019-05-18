@@ -2,7 +2,6 @@
 File where shuffle() method is implemented
 '''
 import json
-# TODO: define shuffle(method) that sorts keys between data nodes after map() method in order to proceed with reduce() method
 import os
 import requests
 
@@ -26,38 +25,36 @@ class ShuffleCommand:
 			('http://' + self._data['data_node_ip'],
 			 data=json.dumps(data))
 		response.raise_for_status()
-		print(response.json())
 		return response.json()
 
 
 def shuffle(content):
 	dir_name = content['file_name'].split(os.sep)[-1]
-	print("DIR_NAME_SHUFFLE")
-	print(dir_name)
-	print("DIR_NAME_SHUFFLE_END")
-	path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name)
 	arbiter_node_json_data = open(os.path.join('config', 'data_node_info.json'))
 	self_node_ip = json.load(arbiter_node_json_data)['self_address']
 	files = []
-	list_of_lines = list()
 	result = {
 		'shuffle_items': [
 		]
 	}
+
+	folder_name = dir_name.split(os.sep)[-1].split('.')[0].split('_')[0]  + "_folder." + \
+				  dir_name.split(os.sep)[-1].split('.')[-1]
 	new_dir_name = dir_name.split(os.sep)[-1].split('.')[0].split('_')[0] + '_shuffle' + '.' + \
 				   dir_name.split(os.sep)[-1].split('.')[-1]
 
-	if not os.path.isfile(new_dir_name):
-		make_file(new_dir_name)
+	if not os.path.isfile(folder_name + os.sep + new_dir_name):
+		make_file(folder_name + os.sep + new_dir_name)
 
 	for i in content['nodes_keys']:
 		result['shuffle_items'].append({'data_node_ip': i['data_node_ip'], 'content': []})
 	# r=root, d=directories, f = files
-
-	for r, d, f in os.walk(path):
+	for r, d, f in os.walk(os.path.join(os.path.dirname(__file__), '..', 'data', folder_name, dir_name)):
 		for file in f:
 			files.append(os.path.join(r, file))
+
 	for f in files:
+
 		for line in open(f):
 
 			for item in content['nodes_keys']:
@@ -72,9 +69,10 @@ def shuffle(content):
 						for i in result['shuffle_items']:
 							if i['data_node_ip'] == item['data_node_ip']:
 								i['content'].append(line)
+
 	for i in result['shuffle_items']:
 		if i['data_node_ip'] == self_node_ip:
-			f = open(os.path.join(os.path.dirname(__file__), '..', 'data', new_dir_name, 'shuffled'), 'a+')
+			f = open(os.path.join(os.path.dirname(__file__), '..', 'data', folder_name, new_dir_name, 'shuffled'), 'a+')
 			f.writelines(i['content'])
 		else:
 			sc = ShuffleCommand(i, new_dir_name)

@@ -6,7 +6,6 @@ File where data node receives requests from management node about:
 4) reduce() method start
 5) request to return a status(if works) and file size
 """
-# # TODO: define methods which implement each request separately
 import os
 import json
 import requests
@@ -22,65 +21,48 @@ def hash_f(str):
 
 
 def create_dest_file(file_name):
+	folder_name_arr = file_name.split(".")
+	folder_name = folder_name_arr[0] + "_folder." + folder_name_arr[-1]
 	if not os.path.isfile(os.path.join('data', file_name)):
 		with open(os.path.join('data', file_name), 'w+') as f:
 			f.close()
+	if not os.path.isdir(os.path.join('data', folder_name)):
+		os.mkdir(os.path.join('data', folder_name))
+
 	dir_name = file_name.split('.')[0] + '_init.' + file_name.split('.')[1]
-	if not os.path.isdir(os.path.join('data', dir_name)):
-		os.makedirs(os.path.join('data', dir_name))
+	if not os.path.isdir(os.path.join('data', folder_name, dir_name)):
+		os.makedirs(os.path.join('data', folder_name, dir_name))
+
 
 def make_file(path):
-	dir_name = path.split(os.sep)[-1]
-	if not os.path.isdir(os.path.join('data', dir_name)):
-		os.makedirs(os.path.join('data', dir_name))
-
+	if not os.path.isdir(os.path.join('data', path)):
+		os.makedirs(os.path.join('data', path))
 
 
 def write(content):
 	dir_name = content['file_name'].split(os.sep)[-2]
 	dir_name_arr = dir_name.split('.')
-	dir_name = dir_name_arr[0] + '_init.' + dir_name_arr[1]
+	new_dir_name = dir_name_arr[0] + '_init.' + dir_name_arr[1]
 	file_name = content['file_name'].split(os.sep)[-1]
-	path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, file_name)
+	folder_name_arr = dir_name.split(".")
+	folder_name = folder_name_arr[0] + "_folder." + folder_name_arr[-1]
+	path = os.path.join(os.path.dirname(__file__), '..', 'data', folder_name, new_dir_name, file_name)
 	f = open(path, 'w+')
 	f.writelines(content['segment'])
 	f.close()
-
-
-'''def reduce(reducer, content):
-    import collections
-    result_dict = collections.Counter()
-    dir_name = os.path.join(os.path.dirname(__file__), '..', 'data', content.split(os.sep)[-1])
-    for file in os.listdir(dir_name):
-        content = open(os.path.join(dir_name, file)).readlines()
-        for field in content:
-            field = field[:-1]
-            for item in content:
-                sum = 0
-                for i in item.split('^')[1]:
-                    sum += ord(i)
-                result_dict[item.split('^')[0]] += sum
-    result = list()
-    for item in result_dict.keys():
-        result.append(item + '^' + str(result_dict[item]))
-
-    return result'''
 
 
 def reduce(content):
 	rds = base64.b64decode(content['reducer'])
 	kd = content['key_delimiter']
 	dest = content['destination_file']
-	print("DEST_REDUCE")
-	print(dest)
-	print("DEST_REDUCE_END")
-
 	dir_name = os.path.join('data', dest.split(os.sep)[-1])
-
 	src_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
 				   + '_shuffle' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
-
-	shuffle_content = open(os.path.join(os.path.dirname(__file__), '..', 'data', src_dir_name, 'shuffled')).readlines()
+	folder_name_arr = dest.split(".")
+	folder_name = folder_name_arr[0] + "_folder." + folder_name_arr[-1]
+	shuffle_content = open(
+		os.path.join(os.path.dirname(__file__), '..', 'data', folder_name, src_dir_name, 'shuffled')).readlines()
 	exec(rds)
 	result = locals()['custom_reducer'](shuffle_content)
 	f = open(os.path.join(os.path.dirname(__file__), '..', 'data', dest), 'w+')
@@ -89,33 +71,45 @@ def reduce(content):
 	return result
 
 
-def map(mapper, field_delimiter, key, dest):
+def map(content):
+	dest = content['destination_file']
+	mapper = content['mapper']
+	field_delimiter = content['field_delimiter']
+	key = content['key_delimiter']
 	dir_name = os.path.join('data', dest.split(os.sep)[-1])
-	print("DIR_NAME")
-	print(dir_name)
-	print("DIR_NAME_END")
+	folder_name = dir_name.split(os.sep)
+	folder_name_arr = folder_name[-1].split(".")
+	folder_name = folder_name_arr[0] + "_folder." + folder_name_arr[-1]
 	new_dir_name = dir_name.split(os.sep)[-1].split('.')[0] \
 				   + '_map' + '.' + dir_name.split(os.sep)[-1].split('.')[-1]
-	print("NEW_DIR_NAME")
-	print(new_dir_name)
-	print("NEW_DIR_NAME_END")
-	make_file(new_dir_name)
-	dir_name_arr = dir_name.split('.')
-	dir_name = dir_name_arr[0] + '_init.' + dir_name_arr[1]
+	make_file(folder_name + os.sep + new_dir_name)
 	decoded_mapper = base64.b64decode(mapper)
-	for file in os.listdir(dir_name):
-		content = open(os.path.join(dir_name, file)).readlines()
+	if not 'server_src' in content:
+		dir_name_arr = dir_name.split('.')
+		dir_name = dir_name_arr[0].split(os.sep)[-1] + '_init.' + dir_name_arr[1]
+		for file in os.listdir('data' + os.sep + folder_name + os.sep + dir_name):
+			content = open(os.path.join('data', folder_name, dir_name, file)).readlines()
+			exec(decoded_mapper)
+			res = locals()['custom_mapper'](content, field_delimiter, key)
+			f = open(os.path.join(os.path.dirname(__file__), '..', 'data', folder_name, new_dir_name, file), 'w+')
+			f.writelines(res)
+			f.close()
+		return new_dir_name
+	else:
+		content = open(os.path.join('data', content['server_src'])).readlines()
 		exec(decoded_mapper)
-		res = locals()['custom_mapper'](content,field_delimiter,key)
-		f = open(os.path.join(os.path.dirname(__file__), '..', 'data', new_dir_name, file), 'w+')
+		res = locals()['custom_mapper'](content, field_delimiter, key)
+		f = open(os.path.join(os.path.dirname(__file__), '..', 'data', folder_name, new_dir_name, new_dir_name), 'w+')
 		f.writelines(res)
 		f.close()
-	return new_dir_name
+		return new_dir_name
 
 
 def hash_keys(content):
 	dir_name = content.split(os.sep)[-1]
-	path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name)
+	folder_name_arr = dir_name.split(".")
+	folder_name = folder_name_arr[0].split("_")[0] + "_folder." + folder_name_arr[1]
+	path = os.path.join(os.path.dirname(__file__), '..', 'data', folder_name, dir_name)
 	files = []
 	hash_key_list = list()
 	# r=root, d=directories, f = files
@@ -149,10 +143,12 @@ def min_max_hash(hash_key_list, file_name):
 def finish_shuffle(content):
 	data = content['finish_shuffle']
 	dir_name = data['file_path']
-	full_dir_name = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name)
+	folder_name_arr = dir_name.split(".")
+	folder_name = folder_name_arr[0].split("_")[0] + "_folder." + folder_name_arr[-1]
+	full_dir_name = os.path.join(os.path.dirname(__file__), '..', 'data', folder_name, dir_name)
 	if not os.path.isfile(full_dir_name):
 		make_file(full_dir_name)
-	f = open(os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, 'shuffled'), 'a+')
+	f = open(os.path.join(os.path.dirname(__file__), '..', 'data', folder_name, dir_name, 'shuffled'), 'a+')
 	f.writelines(data['content'])
 	f.close()
 
@@ -160,25 +156,33 @@ def finish_shuffle(content):
 def clear_data(content):
 	data = content['clear_data']
 	folder_name = data['folder_name']
-	full_folder_name = os.path.join(os.path.dirname(__file__), '..', folder_name)
+	remove_all = data['remove_all_data']
+	folder_name_arr = folder_name.split(".")
+	folder_name_full = folder_name_arr[0] + "_folder." + folder_name_arr[-1]
+	full_folder_name = os.path.join(os.path.dirname(__file__), '..', 'data', folder_name_full)
+
+	if remove_all:
+		os.remove(os.path.join(os.path.dirname(__file__), '..', 'data', folder_name))
 	shutil.rmtree(full_folder_name)
-	os.mkdir(full_folder_name)
+
+
+# os.mkdir(full_folder_name)
 
 def get_file(content):
 	file_name = content['file_name'].split(os.sep)[-1]
-	dir_name = file_name.split('.')[0]+'_reduce.'+file_name.split('.')[1]
+	dir_name = file_name.split('.')[0] + '_reduce.' + file_name.split('.')[1]
 	path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, 'result')
-	print(path)
 	data = open(path).read()
 	return data
+
 
 def get_result_of_key(content):
 	dir_name = content['get_result_of_key']['file_name'].split(os.sep)[-1]
 	key = content['get_result_of_key']['key']
 	field_delimiter = content['get_result_of_key']['field_delimiter']
-	dir_name = dir_name.split('.')[0]+'_reduce.'+dir_name.split('.')[1]
+	dir_name = dir_name.split('.')[0] + '_reduce.' + dir_name.split('.')[1]
 	path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, 'result')
 	file = open(path)
 	for line in file.readlines():
-		if line.split(field_delimiter)[0]==key:
+		if line.split(field_delimiter)[0] == key:
 			return line

@@ -3,7 +3,6 @@ import json
 from multiprocessing import Process
 from receive_commands import receive_commands as rc
 from http_communication import shuffle
-import base64
 
 
 class Handler(server.BaseHTTPRequestHandler):
@@ -27,17 +26,13 @@ class Handler(server.BaseHTTPRequestHandler):
 		json_data_obj = dict()
 		if 'make_file' in content:
 			json_data_obj = content['make_file']
-			#rc.make_file(json_data_obj["file_name"])
 			rc.create_dest_file(json_data_obj["file_name"])
 		elif 'write' in content:
 			json_data_obj = content['write']
 			rc.write(json_data_obj)
 		elif 'map' in content:
 			json_data_obj = content['map']
-			json_data_obj['destination_file'] = rc.map(json_data_obj['mapper'],
-													   json_data_obj['field_delimiter'],
-													   json_data_obj['key_delimiter'],
-													   json_data_obj['destination_file'])
+			json_data_obj['destination_file'] = rc.map(json_data_obj)
 			rc.min_max_hash(rc.hash_keys(json_data_obj['destination_file']), json_data_obj['destination_file'])
 		elif 'shuffle' in content:
 			shuffle.shuffle(content['shuffle'])
