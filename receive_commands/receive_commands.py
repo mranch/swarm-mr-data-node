@@ -64,7 +64,7 @@ def reduce(content):
 	shuffle_content = open(
 		os.path.join(os.path.dirname(__file__), '..', 'data', folder_name, src_dir_name, 'shuffled')).readlines()
 	exec(rds)
-	result = locals()['custom_reducer'](shuffle_content)
+	result = locals()['custom_reducer'](shuffle_content,kd)
 	f = open(os.path.join(os.path.dirname(__file__), '..', 'data', dest), 'w+')
 	f.writelines(result)
 	f.close()
@@ -177,12 +177,12 @@ def get_file(content):
 
 
 def get_result_of_key(content):
-	dir_name = content['get_result_of_key']['file_name'].split(os.sep)[-1]
+	file_name = content['get_result_of_key']['file_name'].split(os.sep)[-1]
 	key = content['get_result_of_key']['key']
 	field_delimiter = content['get_result_of_key']['field_delimiter']
-	dir_name = dir_name.split('.')[0] + '_reduce.' + dir_name.split('.')[1]
-	path = os.path.join(os.path.dirname(__file__), '..', 'data', dir_name, 'result')
+	dir_name = file_name.split('.')[0]+'_folder.'+file_name.split('.')[1]
+	path = os.path.join(os.path.dirname(__file__), '..', 'data',file_name)
 	file = open(path)
 	for line in file.readlines():
-		if line.split(field_delimiter)[0] == key:
+		if line.split('^')[0] == key:
 			return line
